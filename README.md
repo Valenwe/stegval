@@ -1,0 +1,2 @@
+# stegval
+ Simple steganography project

@@ -1,5 +1,5 @@
 # stegval
- Simple steganography project
+ Simple steganography project to hide data inside images.
 
 # Usage
 
@@ -29,5 +29,5 @@ options:
 
   # Examples
 
-- `python .\main.py -m conceal -i fig.jpg -t file "vic.png"` : From file `fig.jpg`, hide the data of the `vic.png` file inside.
-- `python .\main.py -m reveal -i output_image.png` : From file `output_image.png`, find the concealed data.
+- `python .\main.py -m conceal -i fig.jpg -t file "vic.png"` : from file `fig.jpg`, hide the data of the `vic.png` file inside.
+- `python .\main.py -m reveal -i output_image.png` : from file `output_image.png`, find the concealed data.

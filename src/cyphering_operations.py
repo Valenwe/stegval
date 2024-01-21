@@ -9,7 +9,7 @@ from tqdm import tqdm
 conceal_mods = ["simple", "square"]
 conceal_mod_bitlength = 3
 data_bitlength = 64
-already_used_coordinates = []
+already_used_coordinates = set()
 verbose_time_sleep = 0.001
 
 def process_single_bit(image: Image, function_pointer: int, x, y, color_id, width, height, conceal_mod) -> (int, int, int):
@@ -28,10 +28,8 @@ def process_single_bit(image: Image, function_pointer: int, x, y, color_id, widt
             get_pixel_color(image, x, y)
 
             # check if the coordinates have been already used
-            for old_coordinate in already_used_coordinates:
-                old_x, old_y, old_color_id = old_coordinate
-                if old_x == x and old_y == y and old_color_id == color_id:
-                    raise ValueError('These coordinates have already been used before.')
+            if (x, y, color_id) in already_used_coordinates:
+                raise ValueError('These coordinates have already been used before.')
 
             valid_coordinates = True
         except (IndexError, ValueError):
@@ -42,7 +40,7 @@ def process_single_bit(image: Image, function_pointer: int, x, y, color_id, widt
         image.close()
         exit()
 
-    already_used_coordinates.append((x, y, color_id))
+    already_used_coordinates.add((x, y, color_id))
 
     return x, y, color_id
 
@@ -79,7 +77,7 @@ def extract_conceal_mod(image, width, height) -> (str, int):
         pixel_color_binary = list(rgb_to_binary(pixel_color))
         output_conceal_mod_bits += pixel_color_binary[color_id][-1]
 
-        already_used_coordinates.append((x, y, color_id))
+        already_used_coordinates.add((x, y, color_id))
 
     return output_conceal_mod_bits, color_id
 

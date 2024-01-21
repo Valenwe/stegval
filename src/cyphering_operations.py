@@ -1,33 +1,48 @@
 from src.bits_operations import *
 from src.pixel_operations import *
 from src.file_operations import *
+from src.visualizer import *
 
+import time
 from tqdm import tqdm
 
 conceal_mods = ["simple", "square"]
 conceal_mod_bitlength = 3
 data_bitlength = 64
 already_used_coordinates = []
-max_number_fail_pixel = 10
+verbose_time_sleep = 0.001
 
 def process_single_bit(image: Image, function_pointer: int, x, y, color_id, width, height, conceal_mod) -> (int, int, int):
-    """Process to get the next single bit on the image"""
+    """Process to get the next single bit on the image
+    Returns: x, y, color_id"""
 
     # process pixel
     valid_coordinates = False
     false_counter = 0
+
+    # specify the number of tries depending on the minimum size side of the image
+    max_number_fail_pixel = min(width, height) + 10
     while not valid_coordinates and false_counter < max_number_fail_pixel:
         try:
             x, y, color_id = next_pixel(function_pointer, x, y, color_id, width, height, conceal_mod_bitlength, conceal_mod)
             get_pixel_color(image, x, y)
+
+            # check if the coordinates have been already used
+            for old_coordinate in already_used_coordinates:
+                old_x, old_y, old_color_id = old_coordinate
+                if old_x == x and old_y == y and old_color_id == color_id:
+                    raise ValueError('These coordinates have already been used before.')
+
             valid_coordinates = True
-        except IndexError:
+        except (IndexError, ValueError):
             false_counter += 1
 
     if false_counter == max_number_fail_pixel:
-        print(" error, can't add any more bits to the image. You must find a bigger one.")
+        print(" error! Can't add any more bits to the image. You must find a bigger one.")
         image.close()
         exit()
+
+    already_used_coordinates.append((x, y, color_id))
 
     return x, y, color_id
 
@@ -63,6 +78,8 @@ def extract_conceal_mod(image, width, height) -> (str, int):
         pixel_color = get_pixel_color(image, x, y)
         pixel_color_binary = list(rgb_to_binary(pixel_color))
         output_conceal_mod_bits += pixel_color_binary[color_id][-1]
+
+        already_used_coordinates.append((x, y, color_id))
 
     return output_conceal_mod_bits, color_id
 
@@ -100,9 +117,11 @@ def data_to_image(data: bytes, isfile: bool, image_path: str, output_path: str, 
     progress_bar = tqdm(total = len(data), colour="red", desc="Writing data to image...")
 
     # check file length
-    # if not check_input_file_length(data, image_path):
-    #     exit()
+    if not check_input_file_length(data, image_path, data_bitlength, conceal_mod_bitlength):
+        exit()
 
+    if verbose:
+        image_updater = ImageDisplayer(image)
 
     while data_pointer < len(data):
         # get the bit to insert
@@ -117,7 +136,11 @@ def data_to_image(data: bytes, isfile: bool, image_path: str, output_path: str, 
             x, y, color_id = process_single_bit(image, function_pointer, x, y, color_id, width, height, conceal_mod)
             image = hide_single_bit(image, bit, x, y, color_id, verbose)
 
-        already_used_coordinates.append((x, y, color_id))
+        # Will display pixel by pixel the progression
+        if verbose:
+            image_updater.refresh_image(image)
+            time.sleep(verbose_time_sleep)
+
         data_pointer += 1
         function_pointer += 1
         progress_bar.update()
@@ -125,6 +148,10 @@ def data_to_image(data: bytes, isfile: bool, image_path: str, output_path: str, 
     progress_bar.close()
     image.save(output_path, "PNG")
     image.close()
+
+    if verbose:
+        os.system("pause")
+        image_updater.close_plot()
 
     print("Checking data lentgh writing...", end="", flush=True)
     image = Image.open(output_path)
@@ -171,7 +198,7 @@ def extract_data_from_image(image_path: str, output_path: str, verbose: bool):
     conceal_mod = conceal_mods[int(conceal_mod_bits, 2)]
     print("Conceal mod detected:", conceal_mod[0].upper() + conceal_mod[1:] + ".")
 
-    # Assuming the first data_bitlength bits encode the data length and 65th is the type
+    # Get the data length and the data type (file / text)
     while data_pointer < 65:
         # process pixel
         x, y, color_id = process_single_bit(image, function_pointer, x, y, color_id, width, height, conceal_mod)
@@ -186,6 +213,7 @@ def extract_data_from_image(image_path: str, output_path: str, verbose: bool):
         else:
             isfile = bit == "1"
             print("File data detected." if isfile else "Text data detected.")
+
         data_pointer += 1
         function_pointer += 1
 
@@ -193,6 +221,11 @@ def extract_data_from_image(image_path: str, output_path: str, verbose: bool):
     data_pointer = 0
     progress_bar = tqdm(total = data_length, colour="magenta", desc="Fetching data from image...")
 
+    if verbose:
+        image_updater = ImageDisplayer(image)
+        image_updater.refresh_image(image)
+
+    # Get the bulk data
     while data_pointer < data_length:
         # process pixel
         x, y, color_id = process_single_bit(image, function_pointer, x, y, color_id, width, height, conceal_mod)
@@ -201,9 +234,25 @@ def extract_data_from_image(image_path: str, output_path: str, verbose: bool):
 
         # extract bit
         data_bits += pixel_color_binary[color_id][-1]
+
+        # will make the processed pixels go black (data length / file / conceal_mod bits not included)
+        if verbose:
+            pixel_color_binary[color_id] = "00" + pixel_color_binary[color_id][2:]
+            r = pixel_color_binary[0]
+            g = pixel_color_binary[1]
+            b = pixel_color_binary[2]
+            new_color = (int(r, 2), int(g, 2), int(b, 2))
+            image = change_pixel_color(image, x, y, new_color)
+            image_updater.refresh_image(image)
+            time.sleep(verbose_time_sleep)
+
         function_pointer += 1
         data_pointer += 1
         progress_bar.update()
+
+    if verbose:
+        os.system("pause")
+        image_updater.close_plot()
 
     progress_bar.close()
     image.close()

@@ -24,7 +24,7 @@ if __name__ == "__main__":
     parser.add_argument("-t", "--type", dest="type", choices=["text", "file"], required="conceal" in sys.argv, help="[conceal mode] The type of data to hide inside.")
     parser.add_argument("-c", "--conceal_mode", dest="conceal_mode", choices=conceal_mods, default="simple", help="[conceal mode] How the data will be concealed in the image.")
 
-    parser.add_argument("-o", "--output", dest="output", default='output/generated', help="The output filename.")
+    parser.add_argument("-o", "--output", dest="output", default='output/concealed' if "conceal" in sys.argv else 'output/revealed', help="The output filename.")
     parser.add_argument("-v", "--verbose", dest="verbose", action="store_true", default=False, help="Verbosity for debugging purpose")
 
     args, unknownargs = parser.parse_known_args()

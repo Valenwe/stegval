@@ -41,11 +41,11 @@ def represent_bytes(bytes_length) -> str:
         str_bytes = f"{kilobytes_representation:.2f} KB"
 
     else:
-        str_bytes = f"{kilobytes_representation:.2f} B"
+        str_bytes = f"{bytes_length:d} B"
 
     return str_bytes
 
-def check_input_file_length(data: bytes, input_path: str) -> bool:
+def check_input_file_length(data: bytes, input_path: str, data_bitlength: int, conceal_mod_bitlength: int) -> bool:
     """Checks if the data can fit inside the given image"""
     with Image.open(input_path) as img:
         width, height = img.size
@@ -53,8 +53,8 @@ def check_input_file_length(data: bytes, input_path: str) -> bool:
     input_length = total_pixels
 
     data_length = len(data)
-    minimum_image_required = int(data_length * 8 * 3)
-    maximum_input_required = int(input_length / (8 * 3))
+    minimum_image_required = data_length + (data_bitlength + conceal_mod_bitlength)
+    maximum_input_required = input_length - (data_bitlength + conceal_mod_bitlength)
 
     if input_length < minimum_image_required:
 

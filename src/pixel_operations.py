@@ -54,19 +54,19 @@ def square_iterator(iterator, conceal_mod_bitlength, previous_x, previous_y, col
 
     # handle if the square is filling the whole image size (depends on its size)
     if image_width > image_height:
-        if x == center_x - distance and y < 0:
+        if y < 0:
             x = center_x + distance + 1
             y = 0
         elif y >= image_height:
-            x = center_x - distance - 1
-            y = previous_y - 1
+            x = center_x - distance
+            y = center_y + image_height // 2
     else:
         if x < 0:
-            x = center_x - min(distance, image_width // 2)
-            y = previous_y
+            x = center_x - image_width // 2
+            y = center_y - distance - 1
         elif x >= image_width:
-            x = center_x + min(distance, image_width // 2)
-            y = center_y + distance + 1
+            x = center_x + image_width // 2
+            y = center_y + distance
 
     return x, y, color_id
 

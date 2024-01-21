@@ -11,8 +11,9 @@ banner = """ _______________________ _______         _______ _
 | (_____   | |  | (__   | |     | |   | | (___) | |
 (_____  )  | |  |  __)  | | ____( (   ) )  ___  | |
       ) |  | |  | (     | | \_  )\ \_/ /| (   ) | |
-/\____) |  | |  | (____/\ (___) | \   / | )   ( | (____/\\ v1.0 by Valenwe
-\_______)  )_(  (_______(_______)  \_/  |/     \(_______/"""
+/\____) |  | |  | (____/\ (___) | \   / | )   ( | (____/\\ v1.1 by Valenwe
+\_______)  )_(  (_______(_______)  \_/  |/     \(_______/
+"""
 
 if __name__ == "__main__":
     print(banner)
@@ -21,8 +22,9 @@ if __name__ == "__main__":
     parser.add_argument("-i", "--input", dest="input", required=True, help="The image to begin the script from.")
 
     parser.add_argument("-t", "--type", dest="type", choices=["text", "file"], required="conceal" in sys.argv, help="[conceal mode] The type of data to hide inside.")
+    parser.add_argument("-c", "--conceal_mode", dest="conceal_mode", choices=conceal_mods, default="simple", help="[conceal mode] How the data will be concealed in the image.")
 
-    parser.add_argument("-o", "--output", dest="output", default='output/revealed_image.png', required=False, help="The output filename.")
+    parser.add_argument("-o", "--output", dest="output", default='output/generated', help="The output filename.")
     parser.add_argument("-v", "--verbose", dest="verbose", action="store_true", default=False, help="Verbosity for debugging purpose")
 
     args, unknownargs = parser.parse_known_args()
@@ -44,6 +46,8 @@ if __name__ == "__main__":
             logging.error("No filepath has been provided. Please add your file as an argument call.")
             exit()
 
+        if not args["output"].endswith(".png"):
+            args["output"] += ".png"
 
         # get the data as bytes
         if args["type"] == "text":
@@ -54,7 +58,11 @@ if __name__ == "__main__":
                 data = f.read()
             print(" done.")
 
-        generated_filepath = data_to_image(data, args["type"] == "file", args["input"], args["output"], verbose=args["verbose"])
+        # remove the output image if exists
+        if os.path.exists(args["output"]):
+            os.remove(args["output"])
+
+        generated_filepath = data_to_image(data, args["type"] == "file", args["input"], args["output"], args["conceal_mode"], verbose=args["verbose"])
         print("New image generated:", generated_filepath)
 
     # Reveal the data from an image

@@ -1,5 +1,4 @@
 from PIL import Image
-from src.file_operations import get_magic_numbers
 
 def rgb_to_binary(rgb):
     binary_values = [format(value, '08b') for value in rgb]
@@ -24,19 +23,8 @@ def image_to_bits(image_path):
 
     return bits, width, height
 
-def get_magic_signature(data: bytes) -> str:
-    # Define magic signatures for common file types
-    magic_signatures = get_magic_numbers()
-
-    # Check if any magic signature matches
-    for signature, file_type in magic_signatures.items():
-        if starts_with_hex_signature(signature, data):
-            return file_type
-
-    # Return None if no match is found
-    return None
-
 def starts_with_hex_signature(hex_signature: str, bytes_data: bytes) -> bool:
+    """Checks if a given hex signature matches a bytes array"""
     # Remove spaces and non-hex characters from the signature
     cleaned_signature = ''.join(char for char in hex_signature if char.isdigit() or char.isalpha() or char == '?')
 

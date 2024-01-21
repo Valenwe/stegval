@@ -4,6 +4,8 @@ import logging
 from PIL import Image
 import os
 
+from src.bits_operations import starts_with_hex_signature
+
 def get_magic_numbers() -> dict[str, str]:
     print("Fetching magic numbers...", end="", flush=True)
     url = "https://en.wikipedia.org/wiki/List_of_file_signatures"
@@ -44,6 +46,7 @@ def represent_bytes(bytes_length) -> str:
     return str_bytes
 
 def check_input_file_length(data: bytes, input_path: str) -> bool:
+    """Checks if the data can fit inside the given image"""
     with Image.open(input_path) as img:
         width, height = img.size
         total_pixels = width * height
@@ -55,10 +58,17 @@ def check_input_file_length(data: bytes, input_path: str) -> bool:
 
     if input_length < minimum_image_required:
 
-        minimum_repr = represent_bytes(minimum_image_required) + " (actual: {})".format(represent_bytes(data_length))
-        maximum_repr = represent_bytes(maximum_input_required) + " (actual: {})".format(represent_bytes(input_length))
+        image_size = "Actual image size: {}".format(represent_bytes(input_length))
+        input_size = "Actual input size: {}".format(represent_bytes(data_length))
+        warning = "<!> Sizes may vary depending on their bit representation, not their real size <!>"
 
-        logging.error("The input file is too small for the data you're trying to cipher.\nMinimum image size required is {}\nMaximum input size possible is {}".format(minimum_repr, maximum_repr))
+        minimum_repr = "Minimum image size required for that input is  {}".format(represent_bytes(minimum_image_required))
+        maximum_repr = "Maximum input size possible from that image is {}".format(represent_bytes(maximum_input_required))
+
+        logging.error("The input file is too small for the data you're trying to cipher.")
+        for line in [image_size, input_size, warning, minimum_repr, maximum_repr]:
+            print(line)
+
         return False
     return True
 
@@ -91,3 +101,28 @@ def convert_to_png(input_path):
         return output_path
     except Exception as e:
         print(f"Error: {e}")
+
+def get_magic_signature(data: bytes) -> str:
+    """Define magic signatures for common file types"""
+    magic_signatures = get_magic_numbers()
+
+    # Check if any magic signature matches
+    for signature, file_type in magic_signatures.items():
+        if starts_with_hex_signature(signature, data):
+            return file_type
+
+    if is_text_file(data):
+        return "txt"
+
+    # Return None if no match is found
+    return None
+
+def is_text_file(data: bytes):
+    try:
+        content_sample = data.decode("utf-8")[:len(data) // 2]
+
+        if '\x00' in content_sample or '\t' in content_sample or '\x00' in content_sample:
+            return False
+        return True
+    except Exception as e:
+        return False

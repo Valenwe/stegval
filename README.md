@@ -40,13 +40,13 @@ options:
 
 # How does it work?
 
-The program will use the less significant bit for one of the RGB of each pixel of the image, in this specific order:
+The program will use the **less significant bit** for one of the RGB of each pixel of the image, in this specific order:
 
 ![data](examples/data.png)
-1. Conceal mod used (3 bits)
-2. (Only for randomly propagated pixels) Seed
-3. Data length (32 bits)
-4. Data
+1. **Conceal mod** used (3 bits)
+2. (only for randomly propagated pixels) **Seed** (32 bits)
+3. **Data length** (64 bits)
+4. **Data**
 
 ## Simple
 - Conceal mod at the first 3 pixels

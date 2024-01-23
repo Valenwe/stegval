@@ -60,11 +60,18 @@ The program will use the **less significant bit** for one of the RGB of each pix
 
 ![passworded](examples/square.png)
 
-## Random or passworded
+## Random
 
 - Conceal mod at the first 3 pixels
 - Seed on the center as a square
 - The rest is propagated randomly on the remaining pixels
+
+![random](examples/random.png)
+
+## Passworded
+
+- Conceal mod at the first 3 pixels
+- The rest is propagated randomly on the remaining pixels (seed is generated from the password)
 
 ![passworded](examples/password.png)
 

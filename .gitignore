@@ -4,4 +4,4 @@
 __pycache__/
 output/*
 
-!example/*.png
+!examples/*.png

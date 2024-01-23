@@ -14,6 +14,10 @@ def bits_to_text(bits):
     text = ''.join([chr(int(bits[i:i+8], 2)) for i in range(0, len(bits), 8)])
     return text
 
+def string_to_bits(input_string):
+    binary_string = ''.join(format(ord(char), '08b') for char in input_string)
+    return binary_string
+
 def image_to_bits(image_path):
     image = Image.open(image_path)
     width, height = image.size

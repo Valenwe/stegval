@@ -1,6 +1,7 @@
 *.png
 *.jpg
 *.txt
-**/__pycache__/
 __pycache__/
 output/*
+
+!example/*.png

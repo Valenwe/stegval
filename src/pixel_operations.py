@@ -70,8 +70,14 @@ def square_iterator(iterator, conceal_mod_bitlength, previous_x, previous_y, col
 
     return x, y, color_id
 
+def random_iterator(iterator: int, pixels_remaining: list) -> (int, int, int):
+    """Will iterate pixel by pixel randomly using shuffled array
+    Returns: x, y, color_id, seed, pixel_id"""
 
-def next_pixel(iterator, previous_x, previous_y, previous_color_id, image_width, image_height, conceal_mod_bitlength, mod="simple") -> (int, int, int):
+    return pixels_remaining[iterator]
+
+
+def next_pixel(iterator, previous_x, previous_y, previous_color_id, image_width, image_height, conceal_mod_bitlength, mod="simple", pixels_remaining: list=None) -> (int, int, int):
     """function that will say what next pixel will be changed
     Returns x, y, color_id (0: red, 1: green, 2: blue)"""
 
@@ -79,5 +85,7 @@ def next_pixel(iterator, previous_x, previous_y, previous_color_id, image_width,
         x, y, color_id = simple_iterator(iterator, previous_color_id, image_width)
     elif mod == "square":
         x, y, color_id = square_iterator(iterator, conceal_mod_bitlength, previous_x, previous_y, previous_color_id, image_width, image_height)
+    elif mod == "random" or mod == "password":
+        x, y, color_id = random_iterator(iterator, pixels_remaining)
 
     return x, y, color_id

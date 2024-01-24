@@ -43,6 +43,9 @@ if __name__ == "__main__":
     if args["vverbose"]:
         args["verbose"] = True
 
+    if args["vverbose"]:
+        args["verbose"] = True
+
     # Hide data in a given image
     if args["mode"] == "conceal":
         if args["type"] == "text" and len(unknownargs) == 0:
@@ -69,9 +72,11 @@ if __name__ == "__main__":
             os.remove(args["output"])
 
         generated_filepath = data_to_image(data, args["type"] == "file", args["input"], args["output"], args["conceal_mode"], verbose=args["verbose"] + args["vverbose"])
+        generated_filepath = data_to_image(data, args["type"] == "file", args["input"], args["output"], args["conceal_mode"], verbose=args["verbose"] + args["vverbose"])
         print("New image generated:", generated_filepath)
 
     # Reveal the data from an image
     elif args["mode"] == "reveal":
+        text_or_file = extract_data_from_image(args["input"], args["output"], verbose=args["verbose"] + args["vverbose"])
         text_or_file = extract_data_from_image(args["input"], args["output"], verbose=args["verbose"] + args["vverbose"])
         print("Data fetched:", text_or_file)

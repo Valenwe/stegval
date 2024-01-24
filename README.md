@@ -34,7 +34,6 @@ options:
   ```
 
 # Examples
-# Examples
 
 - `python .\main.py -m conceal -i fig.jpg -t file vic.png` : from file `fig.jpg`, hide the data of the `vic.png` file inside.
 - `python .\main.py -m reveal -i output_image.png` : from file `output_image.png`, find the concealed data.
@@ -79,41 +78,3 @@ The program will use the **less significant bit** for one of the RGB of each pix
 
 
 - `python .\main.py -m conceal -i fig.png -t file vic.png -c square` : from file `fig.jpg`, hide the data of the `vic.png` file inside as a square starting from the center.
-
-# How does it work?
-
-The program will use the **less significant bit** for one of the RGB of each pixel of the image, in this specific order:
-
-![data](examples/data.png)
-1. **Conceal mod** used (3 bits)
-2. (only for randomly propagated pixels) **Seed** (32 bits)
-3. **Data length** (64 bits)
-4. **Data**
-
-## Simple
-- Conceal mod at the first 3 pixels
-- Propagate pixel after pixel on the red value
-
-![passworded](examples/simple.png)
-
-## Square
-- Conceal mod at the first 3 pixels
-- Propagate pixel from the center, and around it, and iterate the color id each pixel
-
-![passworded](examples/square.png)
-
-## Random
-
-- Conceal mod at the first 3 pixels
-- Seed on the center as a square
-- The rest is propagated randomly on the remaining pixels
-
-![random](examples/random.png)
-
-## Passworded
-
-- Conceal mod at the first 3 pixels
-- The rest is propagated randomly on the remaining pixels (seed is generated from the password)
-
-![passworded](examples/password.png)
-

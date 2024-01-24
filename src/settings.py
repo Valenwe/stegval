@@ -1,0 +1,5 @@
+CONCEAL_MODS = ["simple", "square", "random", "password"]
+CONCEAL_MOD_BIT_LENGTH = 3
+DATA_BIT_LENGTH = 64
+VERBOSE_TIME_SLEEP = 0.01
+RANDOM_SEED_BIT_LENGTH = 32

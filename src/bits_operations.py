@@ -14,15 +14,6 @@ def bits_to_text(bits):
     text = ''.join([chr(int(bits[i:i+8], 2)) for i in range(0, len(bits), 8)])
     return text
 
-def image_to_bits(image_path):
-    image = Image.open(image_path)
-    width, height = image.size
-
-    pixel_values = list(image.getdata())
-    bits = ''.join(format(value, '08b') for pixel in pixel_values for value in pixel)
-
-    return bits, width, height
-
 def starts_with_hex_signature(hex_signature: str, bytes_data: bytes) -> bool:
     """Checks if a given hex signature matches a bytes array"""
     # Remove spaces and non-hex characters from the signature

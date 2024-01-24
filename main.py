@@ -3,7 +3,8 @@ import argparse
 import logging
 import sys
 
-from src.cyphering_operations import *
+from src.settings import CONCEAL_MODS
+from src.data_writing import *
 
 banner = """ _______________________ _______         _______ _
 (  ____ \__   __(  ____ (  ____ \\     /(  ___  | \\
@@ -11,21 +12,23 @@ banner = """ _______________________ _______         _______ _
 | (_____   | |  | (__   | |     | |   | | (___) | |
 (_____  )  | |  |  __)  | | ____( (   ) )  ___  | |
       ) |  | |  | (     | | \_  )\ \_/ /| (   ) | |
-/\____) |  | |  | (____/\ (___) | \   / | )   ( | (____/\\ v1.1 by Valenwe
+/\____) |  | |  | (____/\ (___) | \   / | )   ( | (____/\\ v1.3 by Valenwe
 \_______)  )_(  (_______(_______)  \_/  |/     \(_______/
 """
 
 if __name__ == "__main__":
     print(banner)
-    parser = argparse.ArgumentParser(prog="StegaVal")
+    parser = argparse.ArgumentParser(prog="StegVal", formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("-m", "--mode", dest="mode", choices=["conceal", "reveal"], required=True, help="The mode selected, between hide data in an image, or fetch data from an image.")
     parser.add_argument("-i", "--input", dest="input", required=True, help="The image to begin the script from.")
 
-    parser.add_argument("-t", "--type", dest="type", choices=["text", "file"], required="conceal" in sys.argv, help="[conceal mode] The type of data to hide inside.")
-    parser.add_argument("-c", "--conceal_mode", dest="conceal_mode", choices=conceal_mods, default="simple", help="[conceal mode] How the data will be concealed in the image.")
+    parser.add_argument("-t", "--type", dest="type", choices=["text", "file"], default="file", help="[conceal mode] The type of data to hide inside.")
+    parser.add_argument("-c", "--conceal_mode", dest="conceal_mode", choices=CONCEAL_MODS, default="simple", help="[conceal mode] How the data will be concealed in the image.")
 
     parser.add_argument("-o", "--output", dest="output", default='output/concealed' if "conceal" in sys.argv else 'output/revealed', help="The output filename.")
-    parser.add_argument("-v", "--verbose", dest="verbose", action="store_true", default=False, help="Verbosity for debugging purpose")
+    parser.add_argument("-v", "--verbose", dest="verbose", action="store_true", default=False, help="Verbosity to display modified pixels and error logs")
+    parser.add_argument("-vv", "--vverbose", dest="vverbose", action="store_true", default=False, help="Verbosity for debugging purpose, enable image modification GUI (slow)")
+
 
     args, unknownargs = parser.parse_known_args()
     args = vars(args)
@@ -36,6 +39,9 @@ if __name__ == "__main__":
 
     if not os.path.exists("output"):
         os.makedirs("output")
+
+    if args["vverbose"]:
+        args["verbose"] = True
 
     # Hide data in a given image
     if args["mode"] == "conceal":
@@ -62,10 +68,10 @@ if __name__ == "__main__":
         if os.path.exists(args["output"]):
             os.remove(args["output"])
 
-        generated_filepath = data_to_image(data, args["type"] == "file", args["input"], args["output"], args["conceal_mode"], verbose=args["verbose"])
+        generated_filepath = data_to_image(data, args["type"] == "file", args["input"], args["output"], args["conceal_mode"], verbose=args["verbose"] + args["vverbose"])
         print("New image generated:", generated_filepath)
 
     # Reveal the data from an image
     elif args["mode"] == "reveal":
-        text_or_file = extract_data_from_image(args["input"], args["output"], verbose=args["verbose"])
+        text_or_file = extract_data_from_image(args["input"], args["output"], verbose=args["verbose"] + args["vverbose"])
         print("Data fetched:", text_or_file)

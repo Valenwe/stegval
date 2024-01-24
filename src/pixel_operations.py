@@ -1,4 +1,11 @@
+from src.bits_operations import rgb_to_binary
 from PIL import Image
+
+class Pixel(tuple):
+    def __init__(self, x, y, color_id):
+        self.x = x
+        self.y = y
+        self.color_id = color_id
 
 def change_pixel_color(image: Image, x, y, new_color):
     image.putpixel((x, y), new_color)
@@ -6,78 +13,45 @@ def change_pixel_color(image: Image, x, y, new_color):
 
 def get_pixel_color(image: Image, x, y):
     pixel_color = image.getpixel((x, y))
-
     return pixel_color
 
-def simple_iterator(pixel_index, color_id, image_width) -> (int, int, int):
-    """Will iterate pixel by pixel from top left corner of the image"""
-    x = pixel_index % image_width
-    y = pixel_index // image_width
+def hide_single_bit(image: Image, bit: str, x: int, y: int, color_id: int, verbose: int) -> Image:
+    """Will hide the given bit on the given location"""
+    pixel_color = get_pixel_color(image, x, y)
+    pixel_color_binary = list(rgb_to_binary(pixel_color))
 
-    return x, y, color_id
+    # new pixel
+    # make all changed pixel to red
+    if verbose >= 1:
+        pixel_color_binary[color_id] = "11" + pixel_color_binary[color_id][2:]
 
-def square_iterator(iterator, conceal_mod_bitlength, previous_x, previous_y, color_id, image_width, image_height) -> (int, int, int):
-    """Will iterate the pixels from center, then forming a square clockwise"""
-    color_id = (color_id + 1) % 3
-    center_x = image_width // 2
-    center_y = image_height // 2
+    pixel_color_binary[color_id] = pixel_color_binary[color_id][:-1] + bit
+    r = pixel_color_binary[0]
+    g = pixel_color_binary[1]
+    b = pixel_color_binary[2]
 
-    if iterator == conceal_mod_bitlength:
-        return image_width // 2, image_height // 2, color_id  # Start from the center
+    new_color = (int(r, 2), int(g, 2), int(b, 2))
 
-    distance = max(abs(center_x - previous_x), abs(center_y - previous_y))
+    # change pixel
+    image = change_pixel_color(image, x, y, new_color)
+    return image
 
-    # if the square ends, go for next one
-    if (previous_x == center_x and previous_y == center_y) or (previous_x == center_x - distance and previous_y == center_y - distance + 1):
-        x = center_x - distance - 1
-        y = center_y - distance - 1
+def set_pixel_black(image: Image, pixel: Pixel) -> Image:
+    """For debugging purpose, will set a given pixel black"""
+    x, y, color_id = pixel
+    pixel_color = get_pixel_color(image, x, y)
+    pixel_color_binary = list(rgb_to_binary(pixel_color))
+    pixel_color_binary[color_id] = "00" + pixel_color_binary[color_id][2:]
+    r = pixel_color_binary[0]
+    g = pixel_color_binary[1]
+    b = pixel_color_binary[2]
+    new_color = (int(r, 2), int(g, 2), int(b, 2))
+    image = change_pixel_color(image, x, y, new_color)
+    return image
 
-    # go right
-    elif previous_y == center_y - distance and previous_x < center_x + distance:
-        x = previous_x + 1
-        y = previous_y
-
-    # go down
-    elif previous_x == center_x + distance and previous_y < center_y + distance:
-        x = previous_x
-        y = previous_y + 1
-
-    # go left
-    elif previous_y == center_y + distance and previous_x > center_x - distance:
-        x = previous_x - 1
-        y = previous_y
-
-    # go up
-    elif previous_x == center_x - distance and previous_y > center_y - distance:
-        x = previous_x
-        y = previous_y - 1
-
-    # handle if the square is filling the whole image size (depends on its size)
-    if image_width > image_height:
-        if y < 0:
-            x = center_x + distance + 1
-            y = 0
-        elif y >= image_height:
-            x = center_x - distance
-            y = center_y + image_height // 2
-    else:
-        if x < 0:
-            x = center_x - image_width // 2
-            y = center_y - distance - 1
-        elif x >= image_width:
-            x = center_x + image_width // 2
-            y = center_y + distance
-
-    return x, y, color_id
-
-
-def next_pixel(iterator, previous_x, previous_y, previous_color_id, image_width, image_height, conceal_mod_bitlength, mod="simple") -> (int, int, int):
-    """function that will say what next pixel will be changed
-    Returns x, y, color_id (0: red, 1: green, 2: blue)"""
-
-    if mod == "simple":
-        x, y, color_id = simple_iterator(iterator, previous_color_id, image_width)
-    elif mod == "square":
-        x, y, color_id = square_iterator(iterator, conceal_mod_bitlength, previous_x, previous_y, previous_color_id, image_width, image_height)
-
-    return x, y, color_id
+def get_bit_from_pixel(image: Image, pixel: Pixel) -> str:
+    """Get the less significant bit from a given pixel (x, y, color_id)"""
+    x, y, color_id = pixel
+    pixel_color = get_pixel_color(image, x, y)
+    pixel_color_binary = list(rgb_to_binary(pixel_color))
+    return pixel_color_binary[color_id][-1]

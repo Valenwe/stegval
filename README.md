@@ -35,9 +35,10 @@ options:
 
 # Examples
 
-- `python .\main.py -m conceal -i fig.jpg -t file vic.png` : from file `fig.jpg`, hide the data of the `vic.png` file inside.
-- `python .\main.py -m reveal -i output_image.png` : from file `output_image.png`, find the concealed data.
-- `python .\main.py -m conceal -i fig.png -t file vic.png -c square` : from file `fig.jpg`, hide the data of the `vic.png` file inside as a square starting from the center.
+- `python main.py -m conceal -i fig.jpg vic.png` : from file `fig.jpg`, hide the data of the `vic.png` file inside.
+- `python main.py -m reveal -i output_image.png` : from file `output_image.png`, find the concealed data.
+- `python main.py -m conceal -i fig.png vic.png -c square` : from file `fig.png`, hide the data of the `vic.png` file inside as a square starting from the center.
+- `python main.py -m conceal -i fig.png -t text "My secret data" -c password` : from file `fig.png`, hide the given text and put a password for the data to be deciphered.
 
 # How does it work?
 
@@ -76,5 +77,3 @@ The program will use the **less significant bit** for one of the RGB of each pix
 
 ![passworded](examples/password.png)
 
-
-- `python .\main.py -m conceal -i fig.png -t file vic.png -c square` : from file `fig.jpg`, hide the data of the `vic.png` file inside as a square starting from the center.
